@@ -1,0 +1,5 @@
+Django
+pylint
+mypy
+black
+djlint
