@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  db:
+    container_name: hsb-db
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+  pgAdmin:
+    container_name: hsb-pgadmin
+    depends_on:
+      - db
+    image: dpage/pgadmin4:8.2
+    ports:
+      - '8080:80'
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+
+  app:
+    build:
+      context: .
+      target: ${STAGE}
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    container_name: hsb-backend
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - IS_DOCKER=true

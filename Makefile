@@ -1,11 +1,18 @@
-create-venv:
-	python3 -m venv .venv
+# Variables
+VENV_DIR = .venv
+PYTHON = python3
+PIP = $(VENV_DIR)/bin/pip
+ACTIVATE = . $(VENV_DIR)/bin/activate
 
-install-deps:
-	.venv/bin/pip install -r requirements.txt
+# Commands
+create-venv:
+	$(PYTHON) -m venv $(VENV_DIR)
+
+install-deps: create-venv
+	$(PIP) install -r requirements.txt
 
 activate-venv:
-	. .venv/bin/activate
+	$(ACTIVATE)
 
 create-requirements:
 	echo "Django" > requirements.txt
@@ -26,11 +33,19 @@ create-mypy-ini:
 	echo "[mypy-django.*]" >> mypy.ini
 	echo "ignore_missing_imports = True" >> mypy.ini
 
+create-gitignore:
+	echo ".venv" > .gitignore
+	echo ".mypy_cache" >> .gitignore
+	echo ".vscode" >> .gitignore
+	echo "db.sqlite3" >> .gitignore
+	echo "__pycache__/" >> .gitignore
+
 setup-django-project:
 	make create-venv
 	make activate-venv
 	make create-requirements
 	make create-mypy-ini
+	make create-gitignore
 	make install-deps
 
 start:
@@ -39,7 +54,7 @@ start:
 clean:
 	rm -f mypy.ini
 	rm -f requirements.txt
-	rm -rf .venv
+	rm -rf $(VENV_DIR)
 	rm -rf .mypy_cache
 
 app:
